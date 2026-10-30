@@ -6,7 +6,7 @@
 
 ## 下载与运行
 
-在 Releases 下载压缩包，解压后将 **MacState 性能监控.app** 移入应用程序目录。
+在 [Downloads](Downloads/MacState-0.1.1-zh.1-arm64.zip) 下载压缩包，解压后将 **MacState 性能监控.app** 移入应用程序目录。
 当前本地发行包面向 Apple Silicon（M1 及更新），要求 macOS 12 或更新。
 应用采用本地临时签名，未经 Apple 公证。首次打开若被系统拦截，请在系统设置 → 隐私与安全性中检查并允许打开。
 
