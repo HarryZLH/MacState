@@ -198,20 +198,7 @@ struct SectionLabel: View {
     }
 }
 
-/// Standard popover chrome: title row with a settings gear, content, and a footer.
-/// AppKit material follows system appearance, contrast and Reduce Transparency.
-private struct PopoverMaterial: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.material = .popover
-        view.blendingMode = .behindWindow
-        view.state = .active
-        return view
-    }
-
-    func updateNSView(_ view: NSVisualEffectView, context: Context) {}
-}
-
+/// Content hosted on the native menu-material panel.
 struct PopoverScaffold<Content: View>: View {
     @ObservedObject private var language = AppLanguage.shared
     var title: String
@@ -239,6 +226,6 @@ struct PopoverScaffold<Content: View>: View {
         }
         .padding(18)
         .frame(width: 300)
-        .background(PopoverMaterial())
+
     }
 }

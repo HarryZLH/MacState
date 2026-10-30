@@ -34,7 +34,7 @@ struct BatteryPopover: View {
                 Divider()
                 if let h = b.healthPercent { StatRow(L("健康度"), "\(h)%", color: Severity.health(h).text) }
                 if let c = b.cycleCount { StatRow(L("循环次数"), "\(c)") }
-                if let cond = b.conditionString { StatRow(L("电池状况"), cond) }
+                if let cond = b.conditionString { StatRow(L("电池状况"), batteryCondition(cond)) }
                 if let mx = b.maxCapacity, let dz = b.designCapacity {
                     StatRow(L("容量"), "\(mx) / \(dz) mAh")
                 }
@@ -188,5 +188,15 @@ struct ScrollIfNeeded<Content: View>: View {
         } else {
             content()
         }
+    }
+}
+
+private func batteryCondition(_ value: String) -> String {
+    switch value.lowercased() {
+    case "normal", "good": return L("正常")
+    case "service recommended", "check battery": return L("建议维修")
+    case "replace soon": return L("建议尽快更换")
+    case "replace now": return L("立即更换")
+    default: return value
     }
 }

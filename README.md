@@ -31,3 +31,5 @@ Copyright (c) 2026 Putu Ari Wisnu and Better Mac Stats contributors。
 ## 语言设置
 
 在设置 → 通用 → 语言中，默认勾选“跟随系统语言”。取消勾选可手动选择简体中文或英语，切换即时生效。暂不支持的系统语言使用英语。外观跟随系统深浅色模式。
+
+菜单栏监控面板使用 AppKit 原生 NSMenu，背景、圆角、边缘与阴影由系统绘制。

@@ -14,7 +14,7 @@ final class MenuBarController: NSObject {
     /// contentViewController resized the existing window from its bottom-left
     /// origin, so popovers of different heights drifted vertically (taller ones
     /// rode up over the icon, shorter ones dropped far below the menu bar).
-    private var popover: NSPopover?
+    private var popover: MenuMaterialPanel?
     private var activeKind: ModuleKind?
     /// `.transient` only closes the popover while this app is active, and a menu
     /// bar agent usually is not, so clicks in other apps are caught here instead.
@@ -199,37 +199,18 @@ final class MenuBarController: NSObject {
 
         guard let button = item.button else { return }
 
-        // Fresh NSPopover every time so the window is created at the correct size
-        // and dropped straight below the status item — no leftover frame to drift.
-        let pop = NSPopover()
-        pop.behavior = .transient
-        pop.animates = true
-        // Inherit the system appearance; do not force a dark menu-bar appearance.
-        pop.appearance = nil
+        let pop = MenuMaterialPanel()
         pop.contentViewController = NSHostingController(
             rootView: ModulePopover(kind: kind, engine: engine, settings: settings,
-                                    onOpenSettings: { [weak self] in self?.openSettings() }))
-        pop.show(relativeTo: button.bounds, of: button, preferredEdge: .maxY)
+                                    onOpenSettings: { [weak self] in
+                                        self?.closePopover()
+                                        DispatchQueue.main.async { self?.openSettings() }
+                                    }))
         popover = pop
         activeKind = kind
-        outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(
-            matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) { [weak self] _ in
-            // Clicks on our own status items arrive here too; handleClick owns those.
-            guard let self, !self.isOverStatusItem(NSEvent.mouseLocation) else { return }
-            self.closePopover()
-        }
-
-        // NSPopover here anchors the window by a fixed bottom instead of dropping
-        // it below the menu bar, so popovers of different heights land at random
-        // vertical offsets. Pin the top edge to the status item's bottom; keep the
-        // x NSPopover chose so the arrow still points at the icon.
-        if let win = pop.contentViewController?.view.window,
-           let btnWin = button.window {
-            let btnScreen = btnWin.convertToScreen(button.convert(button.bounds, to: nil))
-            var f = win.frame
-            f.origin.y = btnScreen.minY - f.height
-            win.setFrame(f, display: true)
-        }
+        // NSMenu runs its own tracking loop and handles outside-click dismissal.
+        pop.show(relativeTo: button.bounds, of: button, preferredEdge: .maxY)
+        if popover === pop { closePopover() }
     }
 
     private func isOverStatusItem(_ point: NSPoint) -> Bool {
