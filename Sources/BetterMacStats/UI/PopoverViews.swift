@@ -20,6 +20,7 @@ func formatRate(_ bytesPerSec: Double, _ settings: AppSettings) -> String {
 // MARK: - Dispatcher
 
 struct ModulePopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     let kind: ModuleKind
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
@@ -43,6 +44,7 @@ struct ModulePopover: View {
 // MARK: - CPU
 
 struct CPUPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
@@ -53,22 +55,22 @@ struct CPUPopover: View {
         PopoverScaffold(title: "CPU", systemImage: "cpu", onOpenSettings: onOpenSettings) {
             HStack(spacing: 14) {
                 RingGauge(fraction: load.total, color: severity.fill,
-                          label: Formatting.percent(load.total), caption: "负载")
+                          label: Formatting.percent(load.total), caption: L("负载"))
                     .frame(width: 64, height: 64)
                 VStack(alignment: .leading, spacing: 5) {
-                    StatRow("系统", Formatting.percent(load.system))
-                    StatRow("用户", Formatting.percent(load.user))
+                    StatRow(L("系统"), Formatting.percent(load.system))
+                    StatRow(L("用户"), Formatting.percent(load.user))
                     if engine.cpuTemperature != nil {
-                        StatRow("温度", formatTemp(engine.cpuTemperature, settings))
+                        StatRow(L("温度"), formatTemp(engine.cpuTemperature, settings))
                     }
-                    StatRow("核心", engine.cpuStatic.coresDescription)
+                    StatRow(L("核心"), engine.cpuStatic.coresDescription)
                 }
             }
             Sparkline(values: engine.cpuHistory, color: severity.fill, maxValue: 1)
                 .frame(height: 40)
             if !load.perCore.isEmpty {
                 Divider()
-                SectionLabel(text: "各核心负载")
+                SectionLabel(text: L("各核心负载"))
                 ForEach(Array(load.perCore.enumerated()), id: \.offset) { idx, value in
                     HStack(spacing: 6) {
                         Text(coreLabel(idx)).font(.system(size: 10, design: .monospaced))
@@ -94,6 +96,7 @@ struct CPUPopover: View {
 // MARK: - GPU
 
 struct GPUPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
@@ -101,22 +104,22 @@ struct GPUPopover: View {
     var body: some View {
         PopoverScaffold(title: "GPU", systemImage: "cube.transparent", onOpenSettings: onOpenSettings) {
             if engine.gpus.isEmpty {
-                EmptyState(text: "此 Mac 暂无 GPU 数据。")
+                EmptyState(text: L("此 Mac 暂无 GPU 数据。"))
             } else {
                 ForEach(engine.gpus) { gpu in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(gpu.name).font(.system(size: 12, weight: .medium)).lineLimit(1)
                         if let util = gpu.utilization {
-                            LabeledBar(label: "使用率", detail: Formatting.percent(util),
+                            LabeledBar(label: L("使用率"), detail: Formatting.percent(util),
                                        fraction: util, color: Severity.load(util).fill)
                         }
                         if let used = gpu.usedVRAM {
                             let total = gpu.totalVRAM
-                            StatRow("显存占用", Formatting.bytes(used)
+                            StatRow(L("显存占用"), Formatting.bytes(used)
                                 + (total != nil ? " / \(Formatting.bytes(total!))" : ""))
                         }
                         if let t = gpu.temperature {
-                            StatRow("温度", formatTemp(t, settings))
+                            StatRow(L("温度"), formatTemp(t, settings))
                         }
                     }
                     .padding(.bottom, 4)
@@ -130,6 +133,7 @@ struct GPUPopover: View {
 // MARK: - Memory
 
 struct MemoryPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
@@ -137,36 +141,36 @@ struct MemoryPopover: View {
     var body: some View {
         let m = engine.memory
         let severity = Severity(m.pressure)
-        PopoverScaffold(title: "内存", systemImage: "memorychip", onOpenSettings: onOpenSettings) {
+        PopoverScaffold(title: L("内存"), systemImage: "memorychip", onOpenSettings: onOpenSettings) {
             HStack(spacing: 14) {
                 RingGauge(fraction: m.usedFraction, color: severity.fill,
-                          label: Formatting.percent(m.usedFraction), caption: "已用")
+                          label: Formatting.percent(m.usedFraction), caption: L("已用"))
                     .frame(width: 64, height: 64)
                 VStack(alignment: .leading, spacing: 5) {
-                    StatRow("已用", Formatting.bytes(m.used))
-                    StatRow("可用", Formatting.bytes(m.available))
-                    StatRow("内存压力", pressureText(m.pressure), color: severity.text)
+                    StatRow(L("已用"), Formatting.bytes(m.used))
+                    StatRow(L("可用"), Formatting.bytes(m.available))
+                    StatRow(L("内存压力"), pressureText(m.pressure), color: severity.text)
                 }
             }
             Sparkline(values: engine.memHistory, color: severity.fill, maxValue: 1)
                 .frame(height: 36)
             Divider()
-            StatRow("总计", Formatting.bytes(m.total))
-            StatRow("应用", Formatting.bytes(m.app))
-            StatRow("联动内存", Formatting.bytes(m.wired))
-            StatRow("已压缩", Formatting.bytes(m.compressed))
-            StatRow("已缓存", Formatting.bytes(m.cached))
+            StatRow(L("总计"), Formatting.bytes(m.total))
+            StatRow(L("应用"), Formatting.bytes(m.app))
+            StatRow(L("联动内存"), Formatting.bytes(m.wired))
+            StatRow(L("已压缩"), Formatting.bytes(m.compressed))
+            StatRow(L("已缓存"), Formatting.bytes(m.cached))
             if m.swapTotal > 0 {
-                StatRow("交换空间", "\(Formatting.bytes(m.swapUsed)) / \(Formatting.bytes(m.swapTotal))")
+                StatRow(L("交换空间"), "\(Formatting.bytes(m.swapUsed)) / \(Formatting.bytes(m.swapTotal))")
             }
         }
     }
 
     private func pressureText(_ p: MemoryPressure) -> String {
         switch p {
-        case .normal: return "正常"
-        case .warning: return "偏高"
-        case .critical: return "严重"
+        case .normal: return L("正常")
+        case .warning: return L("偏高")
+        case .critical: return L("严重")
         }
     }
 }
@@ -174,13 +178,14 @@ struct MemoryPopover: View {
 // MARK: - Disk
 
 struct DiskPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
 
     var body: some View {
         let d = engine.disk
-        PopoverScaffold(title: "磁盘", systemImage: "internaldrive", onOpenSettings: onOpenSettings) {
+        PopoverScaffold(title: L("磁盘"), systemImage: "internaldrive", onOpenSettings: onOpenSettings) {
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 2) {
                     Label(Formatting.bytesPerSecond(d.readBytesPerSec), systemImage: "arrow.down")
@@ -196,9 +201,9 @@ struct DiskPopover: View {
                 }
             }
             Divider()
-            SectionLabel(text: "宗卷")
+            SectionLabel(text: L("宗卷"))
             if d.volumes.isEmpty {
-                EmptyState(text: "未检测到宗卷。")
+                EmptyState(text: L("未检测到宗卷。"))
             } else {
                 ForEach(d.volumes) { vol in
                     LabeledBar(label: vol.name,
@@ -213,13 +218,14 @@ struct DiskPopover: View {
 // MARK: - Network
 
 struct NetworkPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
 
     var body: some View {
         let n = engine.network
-        PopoverScaffold(title: "网络", systemImage: "network", onOpenSettings: onOpenSettings) {
+        PopoverScaffold(title: L("网络"), systemImage: "network", onOpenSettings: onOpenSettings) {
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 2) {
                     Label(formatRate(n.downloadBytesPerSec, settings), systemImage: "arrow.down")
@@ -235,10 +241,10 @@ struct NetworkPopover: View {
                 }
             }
             Divider()
-            if let iface = n.interfaceName { StatRow("网络接口", "\(iface)\(n.connectionType.map { " · \($0)" } ?? "")") }
-            if let ip = n.localIP { StatRow("本机 IP", ip) }
-            StatRow("累计接收", Formatting.bytes(n.totalDownloaded, binary: false))
-            StatRow("累计发送", Formatting.bytes(n.totalUploaded, binary: false))
+            if let iface = n.interfaceName { StatRow(L("网络接口"), "\(iface)\(n.connectionType.map { " · \($0)" } ?? "")") }
+            if let ip = n.localIP { StatRow(L("本机 IP"), ip) }
+            StatRow(L("累计接收"), Formatting.bytes(n.totalDownloaded, binary: false))
+            StatRow(L("累计发送"), Formatting.bytes(n.totalUploaded, binary: false))
         }
     }
 }
@@ -247,6 +253,7 @@ struct NetworkPopover: View {
 
 /// Peak of the last minute, so a chart's height has a scale.
 struct PeakLabel: View {
+    @ObservedObject private var language = AppLanguage.shared
     var text: String
     init(_ text: String) { self.text = text }
     var body: some View {
@@ -255,6 +262,7 @@ struct PeakLabel: View {
 }
 
 struct EmptyState: View {
+    @ObservedObject private var language = AppLanguage.shared
     var text: String
     var body: some View {
         HStack {

@@ -4,66 +4,68 @@ import BetterMacStatsCore
 // MARK: - Battery
 
 struct BatteryPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
 
     var body: some View {
         let b = engine.battery
-        PopoverScaffold(title: "电池", systemImage: "battery.100", onOpenSettings: onOpenSettings) {
+        PopoverScaffold(title: L("电池"), systemImage: "battery.100", onOpenSettings: onOpenSettings) {
             if !b.isPresent {
-                EmptyState(text: "没有内置电池，此 Mac 使用外接电源。")
+                EmptyState(text: L("没有内置电池，此 Mac 使用外接电源。"))
             } else {
                 let frac = Double(b.percentage) / 100.0
                 let color = b.isCharging ? Color.green : Severity.battery(b.percentage).fill
                 HStack(spacing: 14) {
                     RingGauge(fraction: frac, color: color,
-                              label: "\(b.percentage)%", caption: b.isCharging ? "充电中" : nil)
+                              label: "\(b.percentage)%", caption: b.isCharging ? L("充电中") : nil)
                         .frame(width: 64, height: 64)
                     VStack(alignment: .leading, spacing: 5) {
-                        StatRow("状态", statusText(b))
+                        StatRow(L("状态"), statusText(b))
                         if b.isCharging, let f = b.timeToFullMinutes {
-                            StatRow("充满还需", Formatting.duration(minutes: f))
+                            StatRow(L("充满还需"), Formatting.duration(minutes: f))
                         } else if let e = b.timeToEmptyMinutes {
-                            StatRow("剩余时间", Formatting.duration(minutes: e))
+                            StatRow(L("剩余时间"), Formatting.duration(minutes: e))
                         }
-                        if let t = b.temperature { StatRow("温度", formatTemp(t, settings)) }
+                        if let t = b.temperature { StatRow(L("温度"), formatTemp(t, settings)) }
                     }
                 }
                 Divider()
-                if let h = b.healthPercent { StatRow("健康度", "\(h)%", color: Severity.health(h).text) }
-                if let c = b.cycleCount { StatRow("循环次数", "\(c)") }
-                if let cond = b.conditionString { StatRow("电池状况", cond) }
+                if let h = b.healthPercent { StatRow(L("健康度"), "\(h)%", color: Severity.health(h).text) }
+                if let c = b.cycleCount { StatRow(L("循环次数"), "\(c)") }
+                if let cond = b.conditionString { StatRow(L("电池状况"), cond) }
                 if let mx = b.maxCapacity, let dz = b.designCapacity {
-                    StatRow("容量", "\(mx) / \(dz) mAh")
+                    StatRow(L("容量"), "\(mx) / \(dz) mAh")
                 }
             }
         }
     }
 
     private func statusText(_ b: BatteryInfo) -> String {
-        if b.isCharged { return "已充满" }
-        if b.isCharging { return "正在充电" }
-        return b.onACPower ? "使用外接电源（未充电）" : "使用电池"
+        if b.isCharged { return L("已充满") }
+        if b.isCharging { return L("正在充电") }
+        return b.onACPower ? L("使用外接电源（未充电）") : L("使用电池")
     }
 }
 
 // MARK: - Sensors
 
 struct SensorsPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
 
     var body: some View {
-        PopoverScaffold(title: "传感器", systemImage: "thermometer.medium", onOpenSettings: onOpenSettings) {
+        PopoverScaffold(title: L("传感器"), systemImage: "thermometer.medium", onOpenSettings: onOpenSettings) {
             if engine.sensors.isEmpty {
-                EmptyState(text: "此 Mac 未提供传感器数据。")
+                EmptyState(text: L("此 Mac 未提供传感器数据。"))
             } else {
                 VStack(alignment: .leading, spacing: 10) {
-                    group("温度", engine.temperatureSensors)
-                    group("风扇", engine.fanSensors)
-                    group("功率", engine.powerSensors)
+                    group(L("温度"), engine.temperatureSensors)
+                    group(L("风扇"), engine.fanSensors)
+                    group(L("功率"), engine.powerSensors)
                 }
             }
         }
@@ -98,14 +100,15 @@ struct SensorsPopover: View {
 // MARK: - Bluetooth
 
 struct BluetoothPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
 
     var body: some View {
-        PopoverScaffold(title: "蓝牙", systemImage: "dot.radiowaves.right", onOpenSettings: onOpenSettings) {
+        PopoverScaffold(title: L("蓝牙"), systemImage: "dot.radiowaves.right", onOpenSettings: onOpenSettings) {
             if engine.bluetooth.isEmpty {
-                EmptyState(text: "没有已配对的蓝牙设备。")
+                EmptyState(text: L("没有已配对的蓝牙设备。"))
             } else {
                 let devices = engine.bluetooth.sorted { $0.isConnected && !$1.isConnected }
                 // Scroll only for long lists; a ScrollView would otherwise fill
@@ -138,14 +141,15 @@ struct BluetoothPopover: View {
 // MARK: - Clock
 
 struct ClockPopover: View {
+    @ObservedObject private var language = AppLanguage.shared
     @ObservedObject var engine: StatsEngine
     @ObservedObject var settings: AppSettings
     var onOpenSettings: () -> Void
 
     var body: some View {
-        PopoverScaffold(title: "时钟", systemImage: "clock", onOpenSettings: onOpenSettings) {
+        PopoverScaffold(title: L("时钟"), systemImage: "clock", onOpenSettings: onOpenSettings) {
             if engine.clocks.isEmpty {
-                EmptyState(text: "请在设置中添加时区。")
+                EmptyState(text: L("请在设置中添加时区。"))
             } else {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(engine.clocks) { c in
@@ -167,6 +171,7 @@ struct ClockPopover: View {
 }
 
 struct ScrollIfNeeded<Content: View>: View {
+    @ObservedObject private var language = AppLanguage.shared
     var scrolls: Bool
     var maxHeight: CGFloat
     @ViewBuilder var content: () -> Content

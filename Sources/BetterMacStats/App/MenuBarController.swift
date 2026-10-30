@@ -73,7 +73,7 @@ final class MenuBarController: NSObject {
             guard controlItem == nil else { return }
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
             if let button = item.button {
-                button.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: "MacState 性能监控")
+                button.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: L("MacState 性能监控"))
                 button.target = self
                 button.action = #selector(handleControlClick(_:))
             }
@@ -203,7 +203,9 @@ final class MenuBarController: NSObject {
         // and dropped straight below the status item — no leftover frame to drift.
         let pop = NSPopover()
         pop.behavior = .transient
-        pop.animates = false
+        pop.animates = true
+        // Inherit the system appearance; do not force a dark menu-bar appearance.
+        pop.appearance = nil
         pop.contentViewController = NSHostingController(
             rootView: ModulePopover(kind: kind, engine: engine, settings: settings,
                                     onOpenSettings: { [weak self] in self?.openSettings() }))
@@ -250,15 +252,15 @@ final class MenuBarController: NSObject {
     private func showMenu(for item: NSStatusItem) {
         closePopover()
         let menu = NSMenu()
-        let header = menu.addItem(withTitle: "MacState 性能监控", action: nil, keyEquivalent: "")
+        let header = menu.addItem(withTitle: L("MacState 性能监控"), action: nil, keyEquivalent: "")
         header.isEnabled = false
         menu.addItem(.separator())
-        menu.addItem(withTitle: "设置…", action: #selector(openSettingsAction), keyEquivalent: ",").target = self
-        let login = menu.addItem(withTitle: "登录时启动", action: #selector(toggleLogin), keyEquivalent: "")
+        menu.addItem(withTitle: L("设置…"), action: #selector(openSettingsAction), keyEquivalent: ",").target = self
+        let login = menu.addItem(withTitle: L("登录时启动"), action: #selector(toggleLogin), keyEquivalent: "")
         login.target = self
         login.state = settings.launchAtLogin ? .on : .off
         menu.addItem(.separator())
-        menu.addItem(withTitle: "退出 MacState 性能监控", action: #selector(quitAction), keyEquivalent: "q").target = self
+        menu.addItem(withTitle: L("退出 MacState 性能监控"), action: #selector(quitAction), keyEquivalent: "q").target = self
         // Attach and click so AppKit drops the menu right under the item, like a
         // system menu extra. popUp(at:in:) anchored it above the button, off screen.
         item.menu = menu

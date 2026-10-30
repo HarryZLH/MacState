@@ -11,13 +11,13 @@ enum ModuleKind: String, CaseIterable, Codable, Identifiable {
         switch self {
         case .cpu: return "CPU"
         case .gpu: return "GPU"
-        case .memory: return "内存"
-        case .disk: return "磁盘"
-        case .network: return "网络"
-        case .battery: return "电池"
-        case .sensors: return "传感器"
-        case .bluetooth: return "蓝牙"
-        case .clock: return "时钟"
+        case .memory: return L("内存")
+        case .disk: return L("磁盘")
+        case .network: return L("网络")
+        case .battery: return L("电池")
+        case .sensors: return L("传感器")
+        case .bluetooth: return L("蓝牙")
+        case .clock: return L("时钟")
         }
     }
 

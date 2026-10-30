@@ -50,6 +50,7 @@ enum Severity {
 
 /// A line + area sparkline drawn with Path so it runs on macOS 12 (no Swift Charts).
 struct Sparkline: View {
+    @ObservedObject private var language = AppLanguage.shared
     var values: [Double]
     var color: Color
     var fillOpacity: Double = 0.15
@@ -102,6 +103,7 @@ struct Sparkline: View {
 
 /// Horizontal progress bar.
 struct MiniBar: View {
+    @ObservedObject private var language = AppLanguage.shared
     var fraction: Double
     var color: Color
     var height: CGFloat = 6
@@ -109,7 +111,7 @@ struct MiniBar: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.primary.opacity(0.12))
+                Capsule().fill(Color(nsColor: .quaternaryLabelColor))
                 Capsule().fill(color)
                     .frame(width: max(0, min(1, fraction.isFinite ? fraction : 0)) * geo.size.width)
             }
@@ -120,6 +122,7 @@ struct MiniBar: View {
 
 /// Circular gauge with a centered label.
 struct RingGauge: View {
+    @ObservedObject private var language = AppLanguage.shared
     var fraction: Double
     var color: Color
     var label: String
@@ -127,7 +130,7 @@ struct RingGauge: View {
 
     var body: some View {
         ZStack {
-            Circle().stroke(Color.primary.opacity(0.12), lineWidth: 8)
+            Circle().stroke(Color(nsColor: .quaternaryLabelColor), lineWidth: 8)
             Circle()
                 .trim(from: 0, to: min(1, max(0, fraction.isFinite ? fraction : 0)))
                 .stroke(color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
@@ -142,6 +145,7 @@ struct RingGauge: View {
 
 /// Label on the left, value on the right.
 struct StatRow: View {
+    @ObservedObject private var language = AppLanguage.shared
     var label: String
     var value: String
     var color: Color?
@@ -165,6 +169,7 @@ struct StatRow: View {
 
 /// A labeled row with an inline progress bar (e.g. a disk volume).
 struct LabeledBar: View {
+    @ObservedObject private var language = AppLanguage.shared
     var label: String
     var detail: String
     var fraction: Double
@@ -183,6 +188,7 @@ struct LabeledBar: View {
 }
 
 struct SectionLabel: View {
+    @ObservedObject private var language = AppLanguage.shared
     var text: String
     var body: some View {
         Text(text.uppercased())
@@ -193,30 +199,46 @@ struct SectionLabel: View {
 }
 
 /// Standard popover chrome: title row with a settings gear, content, and a footer.
+/// AppKit material follows system appearance, contrast and Reduce Transparency.
+private struct PopoverMaterial: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = .popover
+        view.blendingMode = .behindWindow
+        view.state = .active
+        return view
+    }
+
+    func updateNSView(_ view: NSVisualEffectView, context: Context) {}
+}
+
 struct PopoverScaffold<Content: View>: View {
+    @ObservedObject private var language = AppLanguage.shared
     var title: String
     var systemImage: String
     var onOpenSettings: () -> Void
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
                 Image(systemName: systemImage)
+                    .foregroundColor(.accentColor)
                 Text(title).font(.headline)
             }
             content()
             Divider()
             HStack {
-                Button("设置…", action: onOpenSettings)
+                Button(L("设置…"), action: onOpenSettings)
                     .buttonStyle(.link)
                 Spacer()
-                Button("退出") { NSApp.terminate(nil) }
+                Button(L("退出")) { NSApp.terminate(nil) }
                     .buttonStyle(.link)
             }
             .font(.system(size: 11))
         }
-        .padding(14)
-        .frame(width: 280)
+        .padding(18)
+        .frame(width: 300)
+        .background(PopoverMaterial())
     }
 }
