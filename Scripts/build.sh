@@ -8,7 +8,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-VERSION="0.1.2"
+VERSION="0.1.3"
 BUNDLE_ID="io.github.harryzlh.macstate"
 DEPLOY="12.0"
 DEPLOY_X86="13.0"

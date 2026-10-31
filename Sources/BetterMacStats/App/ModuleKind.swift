@@ -37,11 +37,11 @@ enum ModuleKind: String, CaseIterable, Codable, Identifiable {
         }
     }
 
-    /// Lightweight defaults; heavier/optional modules are opt-in to save battery.
+    /// Default module selection; persisted user choices always take precedence.
     var enabledByDefault: Bool {
         switch self {
-        case .cpu, .memory, .network, .battery, .clock: return true
-        case .gpu, .disk, .sensors, .bluetooth: return false
+        case .cpu, .gpu, .memory, .disk, .network, .sensors: return true
+        case .battery, .bluetooth, .clock: return false
         }
     }
 

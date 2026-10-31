@@ -19,7 +19,7 @@ bash Scripts/build.sh
 # 可选：UNIVERSAL=1 bash Scripts/build.sh
 ```
 
-产物位于 `dist/MacState 性能监控.app`。当前发行版本：0.1.2。
+产物位于 `dist/MacState 性能监控.app`。当前发行版本：0.1.3。
 
 ## 来源和许可证
 

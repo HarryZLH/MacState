@@ -32,6 +32,15 @@ final class AppSettings: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        // Migrate only missing preferences; never replace an existing user choice.
+        if defaults === UserDefaults.standard,
+           let legacy = defaults.persistentDomain(forName: "com.bettermacstats.app") {
+            let keys = ["enabledModules", "moduleOrder", "refreshInterval", "useFahrenheit",
+                        "colorCoded", "showMenuBarIcons", "networkInBits", "clockZones"]
+            for key in keys where defaults.object(forKey: key) == nil {
+                if let value = legacy[key] { defaults.set(value, forKey: key) }
+            }
+        }
 
         let storedEnabled = Self.decode([String].self, defaults, Keys.enabledModules)
             .map { Set($0.compactMap(ModuleKind.init(rawValue:))) }
